@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/26 18:50:29 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/10/27 16:34:29 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/10/27 19:51:43 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,11 @@ int main(int ac, char **av)
 
     try
     {
-        BitcoinExchange btc(av[1]);
+        BitcoinExchange btc("data.csv");
+        btc.get_btc_value(av[1]);
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
-    }
-    
+    } 
 }

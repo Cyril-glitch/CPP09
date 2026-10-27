@@ -26,7 +26,7 @@ $(OBJ_DIR)/%.o : %.cpp
 .PHONY: all clean fclean re it val
 
 it : all
-	./bin/prog /home/cycolonn/Desktop/btc_data/data.csv
+	./bin/prog input.txt 
 
 val: all
 	valgrind --leak-check=full --show-leak-kinds=all ./bin/prog
