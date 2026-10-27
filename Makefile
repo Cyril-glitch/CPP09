@@ -6,7 +6,8 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98
 OBJ_DIR = obj
 BIN_DIR = bin
 
-SRC = src/main.cpp
+SRC = src/main.cpp \
+	  src/BitcoinExchange.cpp
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC:.cpp=.o)))
 
@@ -25,7 +26,7 @@ $(OBJ_DIR)/%.o : %.cpp
 .PHONY: all clean fclean re it val
 
 it : all
-	./bin/prog
+	./bin/prog /home/cycolonn/Desktop/btc_data/data.csv
 
 val: all
 	valgrind --leak-check=full --show-leak-kinds=all ./bin/prog
