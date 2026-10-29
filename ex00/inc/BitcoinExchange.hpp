@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/26 19:06:57 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/10/29 13:01:28 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/10/29 18:49:01 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,14 @@ class BitcoinExchange
         std::map<std::string, double> _map; 
 
         void    _parse_csv(const std::string &csv);        
+
+
+        void    _parse_input(const std::string &buf, std::string &date, std::string &sbtc, size_t &pos);
         int     _check_format(const std::string &buf, size_t &pos);
-        double  _check_value(const std::string &date, const std::string &nbtc);
-        void    _display_value(const std::string &date, const std::string &nbtc, const std::string &buf);
+        int     _check_date(const std::string &date);
+        int     _check_sbtc(const std::string &sbtc, double &nbtc);
+
+        void    _display_value(const std::string &date, double nbtc);
 };
    
 #endif
