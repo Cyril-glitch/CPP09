@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/26 18:50:29 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/10/27 19:51:43 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/10/28 12:45:15 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,6 @@ int main(int ac, char **av)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << BL_RED << e.what() << RESET <<'\n';
     } 
 }
