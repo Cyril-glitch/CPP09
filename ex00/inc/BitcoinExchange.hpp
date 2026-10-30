@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/26 19:06:57 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/10/29 18:49:01 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/10/30 16:17:33 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class BitcoinExchange
 
         BitcoinExchange &operator=(const BitcoinExchange &rhs);
 
-        void get_btc_value(const std::string &input_file);
+        void            get_btc_value(const std::string &input_file);
 
         typedef std::map<std::string, double>::iterator iterator;
         
@@ -42,14 +42,18 @@ class BitcoinExchange
 
         std::map<std::string, double> _map; 
 
-        void    _parse_csv(const std::string &csv);        
+        struct t_input_line
+        {
+            std::string buf;
+            std::string date;
+            std::string sbtc;
+            double nbtc;
+            size_t pos;
+        };
 
-
-        void    _parse_input(const std::string &buf, std::string &date, std::string &sbtc, size_t &pos);
-        int     _check_format(const std::string &buf, size_t &pos);
+        void    _parse_csv(const std::string &csv);
         int     _check_date(const std::string &date);
-        int     _check_sbtc(const std::string &sbtc, double &nbtc);
-
+        int     _parse_input(t_input_line &line);
         void    _display_value(const std::string &date, double nbtc);
 };
    
