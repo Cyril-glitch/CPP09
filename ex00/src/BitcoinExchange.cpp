@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/27 11:50:37 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/10/30 17:41:26 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/10/30 17:45:34 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ int BitcoinExchange::_parse_input(t_input_line &line)
     }
     
     line.date = line.buf.substr(0, line.pos - 1);
-    line.sbtc = line.buf.substr(line.pos + 2, (line.buf.size() - (line.pos + 1)));
+    line.sbtc = line.buf.substr(line.pos + 2, (line.buf.size() - (line.pos - 1)));
 
     if (!_check_date(line.date))
     {
