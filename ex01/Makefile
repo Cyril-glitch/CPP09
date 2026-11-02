@@ -1,4 +1,4 @@
-NAME = bin/prog
+NAME = RPN
 
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98
@@ -16,7 +16,6 @@ VPATH = src
 all : $(NAME)
 
 $(NAME) : $(OBJ)
-	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
 
 $(OBJ_DIR)/%.o : %.cpp
@@ -26,7 +25,7 @@ $(OBJ_DIR)/%.o : %.cpp
 .PHONY: all clean fclean re it val
 
 it : all
-	./bin/prog input.txt 
+	./bin/prog  
 
 val: all
 	valgrind --leak-check=full --show-leak-kinds=all ./bin/prog
@@ -35,7 +34,6 @@ clean :
 	rm -rf $(OBJ_DIR)
 
 fclean : clean
-	rm -rf $(BIN_DIR)
 	rm -rf $(NAME)
 
 re: fclean all
