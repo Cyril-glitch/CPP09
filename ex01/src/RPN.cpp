@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/30 18:32:13 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/11/02 20:32:53 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/03 13:00:06 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,12 @@ RPN::~RPN()
 {
 }
 
-
-int is_operator(const char c)
+static int is_operator(const char c)
 {
     return  (c == '+' || c == '-' || c== '*' || c == '/');  
 }
 
-int check_token(const std::string &token, std::stack<int , std::list<int> > &stack)
+static int check_token(const std::string &token, std::stack<int , std::list<int> > &stack)
 {
     if (token.size() > 1) return 0; 
     if (std::isdigit(token[0]) && token[0] > '9') return 0;
@@ -48,7 +47,7 @@ int check_token(const std::string &token, std::stack<int , std::list<int> > &sta
     return token[0];
 }
 
-int operation(int left, int right, char ope)
+static int operation(int left, int right, char ope)
 {
     if (ope == '/' && right == 0) throw(std::runtime_error("Error"));
 
@@ -60,7 +59,7 @@ int operation(int left, int right, char ope)
     return 0;
 }
 
-void compute(std::stack<int , std::list<int> > &stack , char ope)
+static void compute(std::stack<int , std::list<int> > &stack , char ope)
 {
     
     int right = stack.top();
@@ -85,45 +84,8 @@ int RPN::resolve(const std::string &operation)
         else if (is_operator(token[0])) 
             compute(stack, token[0]); 
     }
+    if (stack.size() > 1)
+        throw(std::invalid_argument("Error"));
+
     return stack.top();
 }
-
-
-
-/*
-    RPN 
-    123 +*
-    
-    STACK
-    [3]
-    [2]
-    [1]
-
-    operator
-    +
-
-    compute
-    left | right = res
-      2  +  3    = 5
-
-    move
-    push [res]
-
-
-    STACK
-    [res]
-    [1]
-
-    operator
-    *
-
-    compute
-    left | right = res
-      1  *  5    = 5
-    
-    move
-    push [res]
-
-    STACK
-    [res]
-    */
