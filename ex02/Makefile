@@ -24,6 +24,9 @@ $(OBJ_DIR)/%.o : %.cpp
 
 .PHONY: all clean fclean re it val
 
+it : $(NAME)
+	./PmergeMe 8 6 7 5 4 3 2 1
+
 clean :
 	rm -rf $(OBJ_DIR)
 

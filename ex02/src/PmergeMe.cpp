@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/03 17:38:22 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/11/04 20:32:08 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/09 20:23:01 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,16 +31,33 @@ PmergeMe& PmergeMe::operator=(const PmergeMe& rhs)
 }
 
 /*-----------------------------------------------------------------------------------------------------*/
-//Parser
+//display
 
-static void display_vector(std::vector<int> &vector)
+/*
+static void display_main(std::vector<int> &main_chain)
 {
-    std::vector<int>::iterator it = vector.begin();
+    std::vector<int>::iterator it = main_chain.begin();
 
-    while (it != vector.end())
+    while (it != main_chain.end())
         std::cout << *it++ << " "; 
     std::cout << "\n";
 }
+*/
+
+static void display_pair_vector(std::vector<std::pair<int,int> > &vector)
+{
+    std::vector<std::pair<int,int> >::iterator it = vector.begin();
+
+    while (it != vector.end())
+    {
+        std::cout << "[" <<it->first << "|" << it->second << "] "; 
+        it++;
+    }
+    std::cout << "\n";
+}
+
+/*-----------------------------------------------------------------------------------------------------*/
+//Parser
 
 static bool fulldig(const std::string &av)
 {
@@ -48,8 +65,8 @@ static bool fulldig(const std::string &av)
         if (std::isdigit(av[i]) == 0) return 0;
     return 1;
 }
-
-static int push_integer(const std::string &av, std::vector<int> &vector)
+ 
+static int push_integer(const std::string &av, std::vector<int> &main_chain)
 {
     char *end;
     errno = 0;
@@ -58,92 +75,178 @@ static int push_integer(const std::string &av, std::vector<int> &vector)
     if (fulldig(av) == false) return 0;
     long cur_int = std::strtol(av.c_str(), &end, 10);
     if (errno == ERANGE || cur_int > INT_MAX || cur_int < 1) return 0;
-    vector.push_back(cur_int);
+    main_chain.push_back(cur_int);
     return 1;
 }
 
-static int parser(int ac, char **av, std::vector<int> &vector)
+static int parser(int ac, char **av, std::vector<int> &main_chain)
 { 
     if (ac < 2) return 0;
-
     for(int i = 1; i < ac; i++)
-        if (!push_integer(av[i], vector)) return 0;
+        if (!push_integer(av[i], main_chain)) return 0;
     return 1;
 }
 
 
 /*-----------------------------------------------------------------------------------------------------*/
-//divide
+//merge sort
 
-static int divide(std::vector<int> &vector, std::vector<std::pair<int,int> > &pair_vector)
+static int divide(std::vector<int> &main_chain, std::vector<std::pair<int,int> > &pair_vector)
 {
-  std::vector<int>::iterator it = vector.begin();
+  std::vector<int>::iterator it = main_chain.begin();
+  int orphan = 0;
 
-    while (it != vector.end())
+    while (main_chain.size() >= 2)
     {
-        if ((it + 1 != vector.end()))
-        {
-            if (*it > *it+1)
-                pair_vector.push_back({*it, *it+1});
+            if (*it > *(it+1))
+                pair_vector.push_back(std::make_pair(*it, *(it+1)));
             else 
-                pair_vector.push_back({*it+1, *it});
-            vector.erase(it+1, it);
-        }
+                pair_vector.push_back(std::make_pair(*(it+1), *it));
+            main_chain.erase(main_chain.begin(), main_chain.begin() + 2);
     }
-    if (!vector.empty())
-        return vector.at(0);
-    return 0;
+    if (!main_chain.empty())
+        orphan = *main_chain.begin();
+    return orphan;
 }
 
-
-bool custom_cmp(const std::pair<int, int>& a, const std::pair<int, int>& b)
+static bool cmp(const std::pair<int, int>& a, const std::pair<int, int>& b)
 {
     return a.first < b.first;
 }
 
-void mergeSort(std::vector<std::pair<int, int> >::iterator start, std::vector<std::pair<int, int> >::iterator end)
+static void merge(std::vector<std::pair<int, int> >::iterator start, std::vector<std::pair<int, int> >::iterator end)
 { 
-    /*
-        1/A chaque appel on divise le paquet de paires en deux intervales
-        2/Quand on ne peut plus diviser ces intervale on remonte et on les trie entre elles
-        3/Le premiere appel qu'on depile compare directement 2 paires
-        4/Le deuxieme compare 2 paires tries vs 2 paires tries ainsi de suite 
-        5/Lors des merges on compare toujours les paires les plus faibles des deux intervales 
-        6/la plus faible rejoint la suite du trie 
-        7/On creer des intervales de paires tries de plus en plus grandes jusqu'a devoir tries les deux moities du tableu d'origine
-    */
-
-    /*on calcule la taille de notre tableau de paires*/
+    /*on calcule la taille de notre interval de paires*/
     size_t size = end - start;
 
     if (size <= 1)
         return;
 
-    /*On determine le milieu de ce tableau pour le diviser en deux*/
+    /*On determine le milieu de cette interval pour le diviser en deux*/
     std::vector<std::pair<int, int> >::iterator center = start + (size / 2);
 
-    /*la 1er moitie du tableau est diviser en deux*/
-    mergeSort(start, center);
+    /*On divise la premiere moitie de l'interval en deux*/
+    merge(start, center);
 
     /*la 2eme moitie du tableau est diviser en deux*/
-    mergeSort(center, end);
+    merge(center, end);
 
-    std::inplace_merge(start, center, end, custom_cmp);
+    std::inplace_merge(start, center, end, cmp);
 }
+
+static void merge_sort(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+{
+    divide(main_chain, pair_vector);
+    merge(pair_vector.begin(), pair_vector.end());
+}
+
+
+/*-----------------------------------------------------------------------------------------------------*/
+//insert 
+
+static int jacobsthal(int n)
+{
+    return ((1UL << (n + 1)) + (n % 2 == 0 ? 1 : -1)) / 3;
+}
+
+/*
+static std::vector<std::pair<int, int> >::iterator find_minor_pos(std::vector<std::pair<int, int> > &pair_vector, int k)
+{ 
+    return pair_vector.begin() + k; 
+}
+
+static std::vector<int>::iterator find_major_pos(std::vector<int> &main_chain, int minor_val)
+{
+    return std::find(main_chain.begin(), main_chain.end(), minor_val); 
+}
+
+static std::vector<int>::iterator binary_search(std::vector<int>::iterator start, std::vector<int>::iterator end, int value)
+{
+
+    while (start < end)
+    {
+        std::vector<int>::iterator mid = start + (end - start) / 2;
+        if (value > *mid)
+            start = mid + 1;
+        else 
+            end = mid;
+    }
+    return start; 
+}
+*/
+
+static void insert_minor(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+{
+    std::vector<std::pair<int, int> >::iterator minor_pos;
+    std::vector<int>::iterator major_pos;
+    std::vector<int>::iterator insert_pos;
+    int minor_val = pair_vector.begin()->second;
+    size_t top = main_chain.size();
+
+
+    main_chain.push_back(minor_val);
+    for (size_t i = 1; i < top; i++)
+    {
+        size_t k = jacobsthal(i);
+        if (k > top)
+            break;
+        std::cout << k << "\n";
+        std::cout << "decre: \n";
+        while(i <= k)
+        {
+            std::cout << k << "\n";
+           
+            //minor_pos = find_minor_pos(pair_vector,k);
+            //minor_val = minor_pos->second;
+            //major_pos = find_major_pos(main_chain, minor_val);
+            //insert_pos = binary_search(main_chain.begin(), major_pos, minor_val);
+            //main_chain.insert(insert_pos, minor_val);
+            k--;
+        }
+        std::cout << "\n\n";
+    }
+}
+
+static void insert_major(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+{
+    std::vector<std::pair<int, int> >::iterator it = pair_vector.begin();
+
+    while (it < pair_vector.end())
+        main_chain.push_back((it++)->first);
+}
+
+static void insert_sort(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+{
+    insert_major(main_chain, pair_vector);
+    insert_minor(main_chain,pair_vector);
+}
+
+/*-----------------------------------------------------------------------------------------------------*/
 
 void PmergeMe::sort_vector(int ac, char **av)
 {
-    std::vector<int> vector;
+    std::vector<int> main_chain;
     std::vector<std::pair<int, int> > pair_vector;
 
+    if (parser(ac, av, main_chain) == 0 ) 
+        throw(std::invalid_argument("Error"));   
 
-    if (parser(ac, av, vector) == 0 ) 
-        throw(std::invalid_argument("Error")); 
-    display_vector(vector);
+    merge_sort(main_chain, pair_vector);
+    display_pair_vector(pair_vector);
 
-    int orphan = divide(vector, pair_vector);    
+    insert_sort(main_chain, pair_vector);
+    //display_main(main_chain);
 }
 
+/*
+   1/A chaque appel on divise le paquet de paires en deux intervales
+   2/Quand on ne peut plus diviser ces intervale on remonte et on les trie entre elles
+   3/Le premiere appel qu'on depile compare directement 2 paires
+   4/Le deuxieme compare 2 paires tries vs 2 paires tries ainsi de suite
+   5/Lors des merges on compare toujours les paires les plus faibles des deux intervales
+   6/la plus faible rejoint la suite du trie
+   7/On creer des intervales de paires tries de plus en plus grandes jusqu'a devoir tries les deux moities du tableu d'origine
+*/
 
 /*
 =============================================================
