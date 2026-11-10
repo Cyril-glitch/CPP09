@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/03 17:38:22 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/11/09 20:23:01 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/10 17:21:13 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ PmergeMe& PmergeMe::operator=(const PmergeMe& rhs)
 /*-----------------------------------------------------------------------------------------------------*/
 //display
 
-/*
 static void display_main(std::vector<int> &main_chain)
 {
     std::vector<int>::iterator it = main_chain.begin();
@@ -42,7 +41,6 @@ static void display_main(std::vector<int> &main_chain)
         std::cout << *it++ << " "; 
     std::cout << "\n";
 }
-*/
 
 static void display_pair_vector(std::vector<std::pair<int,int> > &vector)
 {
@@ -144,12 +142,11 @@ static void merge_sort(std::vector<int> &main_chain, std::vector<std::pair<int, 
 /*-----------------------------------------------------------------------------------------------------*/
 //insert 
 
-static int jacobsthal(int n)
+static size_t jacobsthal(int n)
 {
     return ((1UL << (n + 1)) + (n % 2 == 0 ? 1 : -1)) / 3;
 }
 
-/*
 static std::vector<std::pair<int, int> >::iterator find_minor_pos(std::vector<std::pair<int, int> > &pair_vector, int k)
 { 
     return pair_vector.begin() + k; 
@@ -173,37 +170,38 @@ static std::vector<int>::iterator binary_search(std::vector<int>::iterator start
     }
     return start; 
 }
-*/
 
-static void insert_minor(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+
+static void put_main(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector, size_t idx)
 {
     std::vector<std::pair<int, int> >::iterator minor_pos;
     std::vector<int>::iterator major_pos;
     std::vector<int>::iterator insert_pos;
-    int minor_val = pair_vector.begin()->second;
-    size_t top = main_chain.size();
+    int minor_val;
 
+    minor_pos = find_minor_pos(pair_vector, idx);
+    minor_val = minor_pos->second;
+    major_pos = find_major_pos(main_chain, minor_val);
+    insert_pos = binary_search(main_chain.begin(), major_pos, minor_val);
+    main_chain.insert(insert_pos, minor_val);
+}
 
-    main_chain.push_back(minor_val);
-    for (size_t i = 1; i < top; i++)
+static void insert_minor(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+{
+    size_t rank = 2;
+    size_t cur_jacobsthal = jacobsthal(rank);
+    size_t prev_jacobsthal = jacobsthal(rank - 1);
+    
+    main_chain.insert(main_chain.begin(), pair_vector[0].second);
+    while (main_chain.size() < pair_vector.size() * 2)
     {
-        size_t k = jacobsthal(i);
-        if (k > top)
-            break;
-        std::cout << k << "\n";
-        std::cout << "decre: \n";
-        while(i <= k)
+        for (size_t i = cur_jacobsthal; i > prev_jacobsthal; i--)
         {
-            std::cout << k << "\n";
-           
-            //minor_pos = find_minor_pos(pair_vector,k);
-            //minor_val = minor_pos->second;
-            //major_pos = find_major_pos(main_chain, minor_val);
-            //insert_pos = binary_search(main_chain.begin(), major_pos, minor_val);
-            //main_chain.insert(insert_pos, minor_val);
-            k--;
+            if (i <= pair_vector.size())
+                put_main(main_chain, pair_vector, i - 1);  
         }
-        std::cout << "\n\n";
+        prev_jacobsthal = cur_jacobsthal;
+        cur_jacobsthal = jacobsthal(++rank); 
     }
 }
 
@@ -235,7 +233,7 @@ void PmergeMe::sort_vector(int ac, char **av)
     display_pair_vector(pair_vector);
 
     insert_sort(main_chain, pair_vector);
-    //display_main(main_chain);
+    display_main(main_chain);
 }
 
 /*
