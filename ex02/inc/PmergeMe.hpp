@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/03 17:15:06 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/11/05 14:19:52 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/10 18:45:08 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 #include <iostream>
 #include <utility>
 #include <algorithm>
+#include <functional>
+#include <ctime>
 
 class PmergeMe
 {  

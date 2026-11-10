@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/03 17:38:22 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/11/10 17:21:13 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/10 19:44:04 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,16 @@ static void display_main(std::vector<int> &main_chain)
     std::cout << "\n";
 }
 
+static void display_duration(const clock_t &start, const clock_t &end, const size_t &size)
+{
+    double duration = static_cast<double>(end - start);
+
+    std::cout << "Time to process a range of " 
+              << size << " elements with std::" 
+              << "vector : " << duration << "us\n";
+}
+
+/*
 static void display_pair_vector(std::vector<std::pair<int,int> > &vector)
 {
     std::vector<std::pair<int,int> >::iterator it = vector.begin();
@@ -53,6 +63,7 @@ static void display_pair_vector(std::vector<std::pair<int,int> > &vector)
     }
     std::cout << "\n";
 }
+*/
 
 /*-----------------------------------------------------------------------------------------------------*/
 //Parser
@@ -89,10 +100,19 @@ static int parser(int ac, char **av, std::vector<int> &main_chain)
 /*-----------------------------------------------------------------------------------------------------*/
 //merge sort
 
+static int handle_orphan(std::vector<int> &main_chain)
+{
+    int orphan = 0;
+    if (!main_chain.empty())
+    {
+        orphan = *main_chain.begin();
+        main_chain.pop_back();
+    }
+    return orphan;
+}
 static int divide(std::vector<int> &main_chain, std::vector<std::pair<int,int> > &pair_vector)
 {
   std::vector<int>::iterator it = main_chain.begin();
-  int orphan = 0;
 
     while (main_chain.size() >= 2)
     {
@@ -102,9 +122,7 @@ static int divide(std::vector<int> &main_chain, std::vector<std::pair<int,int> >
                 pair_vector.push_back(std::make_pair(*(it+1), *it));
             main_chain.erase(main_chain.begin(), main_chain.begin() + 2);
     }
-    if (!main_chain.empty())
-        orphan = *main_chain.begin();
-    return orphan;
+    return handle_orphan(main_chain);
 }
 
 static bool cmp(const std::pair<int, int>& a, const std::pair<int, int>& b)
@@ -132,11 +150,6 @@ static void merge(std::vector<std::pair<int, int> >::iterator start, std::vector
     std::inplace_merge(start, center, end, cmp);
 }
 
-static void merge_sort(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
-{
-    divide(main_chain, pair_vector);
-    merge(pair_vector.begin(), pair_vector.end());
-}
 
 
 /*-----------------------------------------------------------------------------------------------------*/
@@ -171,7 +184,6 @@ static std::vector<int>::iterator binary_search(std::vector<int>::iterator start
     return start; 
 }
 
-
 static void put_main(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector, size_t idx)
 {
     std::vector<std::pair<int, int> >::iterator minor_pos;
@@ -186,7 +198,14 @@ static void put_main(std::vector<int> &main_chain, std::vector<std::pair<int, in
     main_chain.insert(insert_pos, minor_val);
 }
 
-static void insert_minor(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+static void insert_orphan(std::vector<int> &main_chain, int orphan)
+{
+    std::vector<int>::iterator insert_pos;
+    insert_pos = binary_search(main_chain.begin(), main_chain.end(), orphan);
+    main_chain.insert(insert_pos, orphan);
+}
+
+static void insert_minor(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector, int orphan)
 {
     size_t rank = 2;
     size_t cur_jacobsthal = jacobsthal(rank);
@@ -203,6 +222,8 @@ static void insert_minor(std::vector<int> &main_chain, std::vector<std::pair<int
         prev_jacobsthal = cur_jacobsthal;
         cur_jacobsthal = jacobsthal(++rank); 
     }
+    if (orphan)
+        insert_orphan (main_chain, orphan);
 }
 
 static void insert_major(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
@@ -213,13 +234,27 @@ static void insert_major(std::vector<int> &main_chain, std::vector<std::pair<int
         main_chain.push_back((it++)->first);
 }
 
-static void insert_sort(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+static void insert_sort(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector, int orphan)
 {
     insert_major(main_chain, pair_vector);
-    insert_minor(main_chain,pair_vector);
+    insert_minor(main_chain,pair_vector, orphan);
 }
 
 /*-----------------------------------------------------------------------------------------------------*/
+
+/*
+static bool is_sorted(const std::vector<int> &v)
+{
+    return std::adjacent_find(v.begin(), v.end(), std::greater<int>()) == v.end();
+}
+*/
+
+static void sort(std::vector<int> &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+{
+    int orphan = divide(main_chain, pair_vector); 
+    merge(pair_vector.begin(),pair_vector.end());
+    insert_sort(main_chain, pair_vector, orphan);
+}
 
 void PmergeMe::sort_vector(int ac, char **av)
 {
@@ -229,11 +264,16 @@ void PmergeMe::sort_vector(int ac, char **av)
     if (parser(ac, av, main_chain) == 0 ) 
         throw(std::invalid_argument("Error"));   
 
-    merge_sort(main_chain, pair_vector);
-    display_pair_vector(pair_vector);
+    std::cout << "before : \n";
+    display_main(main_chain); 
 
-    insert_sort(main_chain, pair_vector);
-    display_main(main_chain);
+    clock_t start = clock();
+    sort(main_chain, pair_vector);
+    clock_t end = clock();
+
+    std::cout << "after : \n";
+    display_main(main_chain); 
+    display_duration(start, end, main_chain.size());
 }
 
 /*

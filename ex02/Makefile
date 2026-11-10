@@ -25,7 +25,10 @@ $(OBJ_DIR)/%.o : %.cpp
 .PHONY: all clean fclean re it val
 
 it : $(NAME)
-	./PmergeMe 8 6 7 5 4 3 2 1
+	./PmergeMe 9 8 7 6 5 4 3 2 1
+
+3000 : $(NAME)
+	./PmergeMe `shuf -i 1-100000 -n 3000 | tr "\n" " "`
 
 clean :
 	rm -rf $(OBJ_DIR)
