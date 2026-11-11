@@ -1,0 +1,50 @@
+/*
+   1/A chaque appel on divise le paquet de paires en deux intervales
+   2/Quand on ne peut plus diviser ces intervale on remonte et on les trie entre elles
+   3/Le premiere appel qu'on depile compare directement 2 paires
+   4/Le deuxieme compare 2 paires tries vs 2 paires tries ainsi de suite
+   5/Lors des merges on compare toujours les paires les plus faibles des deux intervales
+   6/la plus faible rejoint la suite du trie
+   7/On creer des intervales de paires tries de plus en plus grandes jusqu'a devoir tries les deux moities du tableu d'origine
+*/
+
+/*
+=============================================================
+FUSION : 2 PAIRES TRIÉES (GAUCHE)  vs  2 PAIRES TRIÉES (DROITE)
+=============================================================
+
+--- DUEL 1 ---
+GAUCHE :  [ (3,1) , (7,2) ]       DROITE :  [ (2,5) , (8,4) ]
+             ^                                 ^
+             3          --- VS ---             2
+                         2 GAGNE !
+                         (il sort)
+SORTIE :  [ (2,5) ]
+
+
+--- DUEL 2 ---
+GAUCHE :  [ (3,1) , (7,2) ]       DROITE :  [ (8,4) ]
+             ^                                 ^
+             3          --- VS ---             8
+                         3 GAGNE !
+                         (il sort)
+SORTIE :  [ (2,5) , (3,1) ]
+
+
+--- DUEL 3 ---
+GAUCHE :  [ (7,2) ]               DROITE :  [ (8,4) ]
+             ^                                 ^
+             7          --- VS ---             8
+                         7 GAGNE !
+                         (il sort)
+SORTIE :  [ (2,5) , (3,1) , (7,2) ]
+
+
+--- FIN (Pas de duel) ---
+GAUCHE :  [ VIDE ]                DROITE :  [ (8,4) ]
+                                               |
+                                        On le pose direct
+SORTIE :  [ (2,5) , (3,1) , (7,2) , (8,4) ]
+*/
+
+#

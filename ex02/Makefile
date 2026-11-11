@@ -6,8 +6,7 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98
 OBJ_DIR = obj
 BIN_DIR = bin
 
-SRC = src/main.cpp \
-	  src/PmergeMe.cpp
+SRC = src/main.cpp 
 
 OBJ = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC:.cpp=.o)))
 
