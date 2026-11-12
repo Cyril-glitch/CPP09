@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/03 17:15:06 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/11/12 16:03:22 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/12 16:21:34 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -293,7 +293,7 @@ static void insert_major(C &main_chain, PC &pair_container)
 {
     typename PC::iterator it = pair_container.begin();
 
-    while (it < pair_container.end())
+    while (it != pair_container.end())
         main_chain.push_back((it++)->first);
 }
 

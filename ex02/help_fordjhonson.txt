@@ -1,4 +1,4 @@
-/*
+   /*Merge Sort*/
    1/A chaque appel on divise le paquet de paires en deux intervales
    2/Quand on ne peut plus diviser ces intervale on remonte et on les trie entre elles
    3/Le premiere appel qu'on depile compare directement 2 paires
@@ -6,9 +6,7 @@
    5/Lors des merges on compare toujours les paires les plus faibles des deux intervales
    6/la plus faible rejoint la suite du trie
    7/On creer des intervales de paires tries de plus en plus grandes jusqu'a devoir tries les deux moities du tableu d'origine
-*/
 
-/*
 =============================================================
 FUSION : 2 PAIRES TRIÉES (GAUCHE)  vs  2 PAIRES TRIÉES (DROITE)
 =============================================================
@@ -45,6 +43,13 @@ GAUCHE :  [ VIDE ]                DROITE :  [ (8,4) ]
                                                |
                                         On le pose direct
 SORTIE :  [ (2,5) , (3,1) , (7,2) , (8,4) ]
-*/
 
-#
+/*Insert*/
+
+1/On renvoie les entiers majeur des paires tries dans la main chain
+2/On envoie l'entier mineur de la plus petites paires au dessus de la main chain
+3/On utilise la suite de jacobsthal pour determine l'ordre des chiffre restant a inserer
+4/Cela nous permet de faire un binary search dans une interval d'emplacement optimal 
+5/Cette interval sera toujours egal a un entier impair precedent une puissance de 2( ex: 3-7-15-31)
+6/on insere l'entier en utilisant un binary search c'est a dire qu'on va rechercher l'emplacement de l'entier en effectuant une division par 2 sur l'intervale a chaque boucle.
+
