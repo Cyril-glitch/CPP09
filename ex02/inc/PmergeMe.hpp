@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/03 17:15:06 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/11/11 17:50:03 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/12 16:03:22 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,22 @@
 #include <cerrno>
 #include <deque>
 #include <iomanip>
+#include <cctype>
+
+template <typename T>
+struct PairContainer;
+
+template <>
+struct PairContainer<std::vector<int> >
+{
+    typedef std::vector<std::pair<int, int> > type;
+};
+
+template <>
+struct PairContainer<std::deque<int> >
+{
+    typedef std::deque<std::pair<int, int> > type;
+};
 
 template <typename C>
 class PmergeMe
@@ -151,15 +167,15 @@ static int handle_orphan(C &main_chain)
     return orphan;
 }
 
-template <typename C>
-static int divide(C &main_chain, std::vector<std::pair<int,int> > &pair_vector)
+template <typename C, typename PC>
+static int divide(C &main_chain, PC &pair_container)
 {
     while (main_chain.size() >= 2)
     {
         if (main_chain[0] > main_chain[1])
-            pair_vector.push_back(std::make_pair(main_chain[0], main_chain[1]));
+            pair_container.push_back(std::make_pair(main_chain[0], main_chain[1]));
         else 
-            pair_vector.push_back(std::make_pair(main_chain[1], main_chain[0]));
+            pair_container.push_back(std::make_pair(main_chain[1], main_chain[0]));
         main_chain.erase(main_chain.begin(), main_chain.begin() + 2);
     }
     return handle_orphan(main_chain);
@@ -170,7 +186,8 @@ static bool cmp(const std::pair<int, int>& a, const std::pair<int, int>& b)
     return a.first < b.first;
 }
 
-static void merge(std::vector<std::pair<int, int> >::iterator start, std::vector<std::pair<int, int> >::iterator end)
+template <typename Iter>
+static void merge(Iter start, Iter end)
 { 
     /*on calcule la taille de notre interval de paires*/
     size_t size = end - start;
@@ -179,7 +196,7 @@ static void merge(std::vector<std::pair<int, int> >::iterator start, std::vector
         return;
 
     /*On determine le milieu de cette interval pour le diviser en deux*/
-    std::vector<std::pair<int, int> >::iterator center = start + (size / 2);
+    Iter center = start + (size / 2);
 
     /*On divise la premiere moitie de l'interval en deux*/
     merge(start, center);
@@ -198,9 +215,10 @@ static size_t jacobsthal(int n)
     return ((1UL << (n + 1)) + (n % 2 == 0 ? 1 : -1)) / 3;
 }
 
-static std::vector<std::pair<int, int> >::iterator find_minor_pos(std::vector<std::pair<int, int> > &pair_vector, int idx)
+template <typename PC>
+static typename PC::iterator find_minor_pos(PC &pair_container, int idx)
 { 
-    return pair_vector.begin() + idx; 
+    return pair_container.begin() + idx; 
 }
 
 template <typename C>
@@ -223,16 +241,16 @@ static typename C::iterator binary_search(typename C::iterator start, typename C
     return start; 
 }
 
-template <typename C>
-static void insert_main(C &main_chain, std::vector<std::pair<int, int> > &pair_vector, size_t idx)
+template <typename C, typename PC>
+static void insert_main(C &main_chain, PC &pair_container, size_t idx)
 {
-    std::vector<std::pair<int, int> >::iterator minor_pos;
+    typename PC::iterator minor_pos;
     typename C::iterator major_pos;
     typename C::iterator insert_pos;
     int minor_val;
     int major_val;
 
-    minor_pos = find_minor_pos(pair_vector, idx);
+    minor_pos = find_minor_pos(pair_container, idx);
     minor_val = minor_pos->second;
     major_val = minor_pos->first;
     major_pos = find_major_pos(main_chain, major_val);
@@ -248,20 +266,20 @@ static void insert_orphan(C &main_chain, int orphan)
     main_chain.insert(insert_pos, orphan);
 }
 
-template <typename C>
-static void insert_minor(C &main_chain, std::vector<std::pair<int, int> > &pair_vector, int orphan)
+template <typename C, typename PC>
+static void insert_minor(C &main_chain, PC &pair_container, int orphan)
 {
     size_t rank = 2;
     size_t cur_jacobsthal = jacobsthal(rank);
     size_t prev_jacobsthal = jacobsthal(rank - 1);
     
-    main_chain.insert(main_chain.begin(), pair_vector[0].second);
-    while (main_chain.size() < pair_vector.size() * 2)
+    main_chain.insert(main_chain.begin(), pair_container[0].second);
+    while (main_chain.size() < pair_container.size() * 2)
     {
         for (size_t i = cur_jacobsthal; i > prev_jacobsthal; i--)
         {
-            if (i <= pair_vector.size())
-                insert_main(main_chain, pair_vector, i - 1);  
+            if (i <= pair_container.size())
+                insert_main(main_chain, pair_container, i - 1);  
         }
         prev_jacobsthal = cur_jacobsthal;
         cur_jacobsthal = jacobsthal(++rank); 
@@ -270,20 +288,20 @@ static void insert_minor(C &main_chain, std::vector<std::pair<int, int> > &pair_
         insert_orphan(main_chain, orphan);
 }
 
-template <typename C>
-static void insert_major(C &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+template <typename C, typename PC>
+static void insert_major(C &main_chain, PC &pair_container)
 {
-    std::vector<std::pair<int, int> >::iterator it = pair_vector.begin();
+    typename PC::iterator it = pair_container.begin();
 
-    while (it < pair_vector.end())
+    while (it < pair_container.end())
         main_chain.push_back((it++)->first);
 }
 
-template <typename C>
-static void insert_sort(C &main_chain, std::vector<std::pair<int, int> > &pair_vector, int orphan)
+template <typename C, typename PC>
+static void insert_sort(C &main_chain, PC &pair_container, int orphan)
 {
-    insert_major(main_chain, pair_vector);
-    insert_minor(main_chain, pair_vector, orphan);
+    insert_major(main_chain, pair_container);
+    insert_minor(main_chain, pair_container, orphan);
 }
 
 /*-----------------------------------------------------------------------------------------------------*/
@@ -294,23 +312,23 @@ static bool is_sorted(const C &c)
     return std::adjacent_find(c.begin(), c.end(), std::greater<int>()) == c.end();
 }
 
-template <typename C>
-static void ford_johnson(C &main_chain, std::vector<std::pair<int, int> > &pair_vector)
+template <typename C, typename PC>
+static void ford_johnson(C &main_chain, PC &pair_container)
 {
-    int orphan = divide(main_chain, pair_vector); 
-    merge(pair_vector.begin(), pair_vector.end());
-    insert_sort(main_chain, pair_vector, orphan);
+    int orphan = divide(main_chain, pair_container); 
+    merge(pair_container.begin(), pair_container.end());
+    insert_sort(main_chain, pair_container, orphan);
 }
 
 template <typename C>
 double PmergeMe<C>::sort(C &main_chain)
 {
-    std::vector<std::pair<int, int> > pair_vector;
+    typename PairContainer<C>::type pair_container;
     if (main_chain.size() == 1)
         return 0.0;
 
     clock_t start = clock();
-    ford_johnson(main_chain, pair_vector);
+    ford_johnson(main_chain, pair_container);
     clock_t end = clock();
 
     if (!is_sorted(main_chain))

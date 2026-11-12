@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/27 11:50:37 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/10/30 17:45:34 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/12 12:59:31 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,9 +135,10 @@ int BitcoinExchange::_check_date(const std::string &date)
 static int check_sbtc(const std::string &sbtc, double &nbtc)
 {
     char *end;
+    errno = 0;
     nbtc = std::strtod(sbtc.c_str(), &end);
 
-    if (*end != '\0')
+    if (*end != '\0' || errno == ERANGE)
         return 0;
     else
         return 1;
@@ -146,34 +147,17 @@ static int check_sbtc(const std::string &sbtc, double &nbtc)
 int BitcoinExchange::_parse_input(t_input_line &line)
 {
     if ((!check_format(line.buf, line.pos)))
-    {
-        std::cerr << "Error: bad input => " << line.buf << "\n"; 
-        return 0;
-    }
+        return std::cerr << "Error: bad input => " << line.buf << "\n", 0;
     
     line.date = line.buf.substr(0, line.pos - 1);
     line.sbtc = line.buf.substr(line.pos + 2, (line.buf.size() - (line.pos - 1)));
 
-    if (!_check_date(line.date))
-    {
-        std::cerr << "Error: bad input => " << line.date << "\n"; 
-        return 0;
-    }
-    else if (!check_sbtc(line.sbtc, line.nbtc))
-    {
-        std::cerr << "Error: bad input => " << line.sbtc << "\n"; 
-        return 0;
-    }
+    if (!_check_date(line.date) || !check_sbtc(line.sbtc, line.nbtc))
+        return std::cerr << "Error: bad input => " << line.buf << "\n", 0;
     else if (line.nbtc > 1000)
-    {
-        std::cerr << "Error: too large a number.\n"; 
-        return 0;
-    }
+        return std::cerr << "Error: too large a number.\n", 0; 
     else if (line.nbtc < 0)
-    {
-        std::cerr << "Error: not a positive number.\n"; 
-        return 0;
-    }
+        return std::cerr << "Error: not a positive number.\n", 0; 
 
     return 1;
 }

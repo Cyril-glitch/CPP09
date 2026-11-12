@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/30 18:32:13 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/11/03 13:00:06 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/12 14:59:44 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ static int is_operator(const char c)
 static int check_token(const std::string &token, std::stack<int , std::list<int> > &stack)
 {
     if (token.size() > 1) return 0; 
-    if (std::isdigit(token[0]) && token[0] > '9') return 0;
+    if (!(std::isdigit(token[0]) || is_operator(token[0]))) return 0;
     if (is_operator(token[0]) && stack.size() < 2) return 0; 
     return token[0];
 }
@@ -84,7 +84,7 @@ int RPN::resolve(const std::string &operation)
         else if (is_operator(token[0])) 
             compute(stack, token[0]); 
     }
-    if (stack.size() > 1)
+    if (stack.size() != 1)
         throw(std::invalid_argument("Error"));
 
     return stack.top();

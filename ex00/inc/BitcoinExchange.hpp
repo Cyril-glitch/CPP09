@@ -6,7 +6,7 @@
 /*   By: cycolonn <cycolonn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/26 19:06:57 by cycolonn          #+#    #+#             */
-/*   Updated: 2026/10/30 16:17:33 by cycolonn         ###   ########.fr       */
+/*   Updated: 2026/11/12 15:01:41 by cycolonn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <climits>
-
+#include <cerrno>
+#include <cctype>
 
 class BitcoinExchange
 {
